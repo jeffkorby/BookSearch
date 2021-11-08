@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Jumbotron, Container, CardColumns, Card, Button } from 'react-bootstrap';
 
-import { getMe, deleteBook } from '../utils/API';
+//import { getMe, deleteBook } from '../utils/API';
 import Auth from '../utils/auth';
 import { removeBookId } from '../utils/localStorage';
+import { useQuery, useMutation } from '@apollo/client';
+import { GET_ME } from '../utils/queries';
+import { REMOVE_BOOK } from '../utils/mutations';
 
 const SavedBooks = () => {
   const [userData, setUserData] = useState({});
+  const { loading, data } = data?.me || [];
+  const [removeBook, { error }] = useMutation(REMOVE_BOOK)
 
   // use this to determine if `useEffect()` hook needs to run again
   const userDataLength = Object.keys(userData).length;
@@ -45,7 +50,9 @@ const SavedBooks = () => {
     }
 
     try {
-      const response = await deleteBook(bookId, token);
+      const response = await removeBook({
+        variables: { bookId: bookId },
+      });
 
       if (!response.ok) {
         throw new Error('something went wrong!');
@@ -65,6 +72,9 @@ const SavedBooks = () => {
     return <h2>LOADING...</h2>;
   }
 
+  const savedBookIds = userData.savedBooks.map((book) => book.bookId);
+  saveBookIds(savedBookIds);
+  
   return (
     <>
       <Jumbotron fluid className='text-light bg-dark'>
